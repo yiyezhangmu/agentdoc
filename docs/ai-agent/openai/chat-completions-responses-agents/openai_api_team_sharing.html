@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OpenAI Chat Completions、Responses API 与 Agents SDK</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121a31;
+    --panel2:#17213d;
+    --text:#eaf0ff;
+    --muted:#9fb0d0;
+    --line:#2a3658;
+    --blue:#6ea8ff;
+    --cyan:#4fd1c5;
+    --purple:#b48cff;
+    --orange:#ffb86b;
+    --green:#78e08f;
+    --red:#ff7b8a;
+    --shadow:0 18px 50px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(circle at 15% 5%, rgba(110,168,255,.14), transparent 26%),
+      radial-gradient(circle at 85% 10%, rgba(180,140,255,.12), transparent 28%),
+      linear-gradient(180deg,#09101f,#0b1020 28%,#0d1426);
+    color:var(--text);
+    line-height:1.75;
+  }
+  a{color:inherit;text-decoration:none}
+  .layout{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+  aside{
+    position:sticky;top:0;height:100vh;padding:28px 20px;
+    border-right:1px solid var(--line);
+    background:rgba(8,13,26,.86);
+    backdrop-filter:blur(14px);
+    overflow:auto;
+  }
+  .brand{
+    font-weight:800;font-size:18px;line-height:1.4;margin-bottom:8px
+  }
+  .brand small{display:block;color:var(--muted);font-weight:500;margin-top:8px}
+  nav{margin-top:26px}
+  nav a{
+    display:block;padding:9px 11px;border-radius:10px;
+    color:var(--muted);font-size:14px;margin:3px 0
+  }
+  nav a:hover{background:var(--panel2);color:var(--text)}
+  .side-note{
+    margin-top:26px;padding:14px;border:1px solid var(--line);
+    border-radius:14px;background:linear-gradient(180deg,rgba(110,168,255,.08),rgba(180,140,255,.05));
+    color:var(--muted);font-size:13px
+  }
+  main{padding:0 40px 80px}
+  .hero{
+    min-height:88vh;display:flex;flex-direction:column;justify-content:center;
+    max-width:1180px;margin:auto;padding:70px 0 40px
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    width:max-content;padding:7px 12px;border:1px solid #38507e;border-radius:999px;
+    color:#b9d3ff;background:rgba(110,168,255,.08);font-size:13px
+  }
+  h1{font-size:clamp(40px,6vw,76px);line-height:1.05;margin:24px 0 20px;letter-spacing:-2px}
+  .gradient{
+    background:linear-gradient(90deg,#f3f7ff,#7eb6ff 42%,#c299ff 72%,#70e0d4);
+    -webkit-background-clip:text;background-clip:text;color:transparent
+  }
+  .lead{max-width:880px;color:var(--muted);font-size:20px}
+  .hero-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px
+  }
+  .hero-card,.card{
+    border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,rgba(23,33,61,.94),rgba(16,24,46,.94));
+    box-shadow:var(--shadow)
+  }
+  .hero-card{padding:22px}
+  .hero-card b{display:block;font-size:19px;margin-bottom:8px}
+  .hero-card p{margin:0;color:var(--muted);font-size:14px}
+  section{max-width:1180px;margin:0 auto;padding:68px 0}
+  .section-kicker{color:var(--cyan);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  h2{font-size:36px;line-height:1.2;margin:8px 0 18px}
+  h3{font-size:23px;margin:26px 0 12px}
+  p{color:#d9e3f7}
+  .muted{color:var(--muted)}
+  .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .card{padding:24px}
+  .card h3{margin-top:0}
+  .badge{
+    display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800;
+    background:rgba(110,168,255,.12);color:#bbd4ff;border:1px solid rgba(110,168,255,.28)
+  }
+  .badge.green{background:rgba(120,224,143,.10);color:#b8f2c4;border-color:rgba(120,224,143,.25)}
+  .badge.purple{background:rgba(180,140,255,.10);color:#d7c3ff;border-color:rgba(180,140,255,.25)}
+  .callout{
+    padding:20px 22px;border-left:4px solid var(--blue);border-radius:12px;
+    background:rgba(110,168,255,.08);margin:22px 0;color:#dbe8ff
+  }
+  .warning{border-left-color:var(--orange);background:rgba(255,184,107,.08)}
+  .success{border-left-color:var(--green);background:rgba(120,224,143,.08)}
+  pre{
+    position:relative;margin:18px 0;padding:20px;overflow:auto;
+    border-radius:16px;border:1px solid #2c3a61;
+    background:#08101f;color:#dbe8ff;font-size:14px;line-height:1.6;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03)
+  }
+  code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}
+  .code-title{
+    margin-bottom:-8px;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase
+  }
+  .flow{
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:24px 0
+  }
+  .flow .node{
+    padding:13px 16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);
+    font-weight:700
+  }
+  .arrow{color:var(--blue);font-weight:900}
+  table{
+    width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;
+    border:1px solid var(--line);border-radius:16px;background:rgba(17,26,49,.88)
+  }
+  th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#17213d;color:#cfe0ff}
+  tr:last-child td{border-bottom:none}
+  td{color:#d9e3f7}
+  .role{
+    display:grid;grid-template-columns:120px 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)
+  }
+  .role:last-child{border-bottom:none}
+  .role-name{font-weight:900;color:#fff}
+  .role-desc{color:var(--muted)}
+  .compare-strip{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:26px 0
+  }
+  .compare-item{padding:18px;border:1px solid var(--line);border-radius:16px;background:rgba(23,33,61,.72)}
+  .compare-item strong{display:block;margin-bottom:8px}
+  .footer{
+    max-width:1180px;margin:20px auto 0;padding-top:32px;border-top:1px solid var(--line);
+    color:var(--muted);font-size:13px
+  }
+  .pill-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .pill{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#141d36;color:#cfd9ee;font-size:13px}
+  @media(max-width:980px){
+    .layout{display:block}
+    aside{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+    nav{display:flex;flex-wrap:wrap;gap:6px}
+    nav a{display:inline-block}
+    main{padding:0 20px 60px}
+    .hero-grid,.grid-3,.compare-strip{grid-template-columns:1fr}
+    .grid-2{grid-template-columns:1fr}
+    h1{letter-spacing:-1px}
+  }
+  @media print{
+    aside{display:none}
+    .layout{display:block}
+    body{background:white;color:#111}
+    main{padding:0 20px}
+    .hero{min-height:auto}
+    .hero-card,.card,table,pre{box-shadow:none}
+    section{page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">
+      OpenAI API 技术分享
+      <small>Chat Completions · Responses API · Agents SDK</small>
+    </div>
+    <nav>
+      <a href="#overview">01 三者关系</a>
+      <a href="#chat">02 Chat Completions</a>
+      <a href="#roles">03 消息角色</a>
+      <a href="#history">04 多轮历史</a>
+      <a href="#tools">05 工具调用</a>
+      <a href="#params">06 常用参数</a>
+      <a href="#responses">07 Responses API</a>
+      <a href="#items">08 Item 模型</a>
+      <a href="#mapping">09 参数映射</a>
+      <a href="#agents">10 Agents SDK</a>
+      <a href="#compare">11 三者对比</a>
+      <a href="#choice">12 选型建议</a>
+    </nav>
+    <div class="side-note">
+      适合直接用浏览器打开分享，也可打印为 PDF。页面已做响应式布局。
+    </div>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">TEAM TECH SHARING · 2026</span>
+      <h1><span class="gradient">OpenAI Chat Completions、Responses API 与 Agents SDK</span></h1>
+      <p class="lead">
+        从传统消息式调用，到新一代统一响应接口，再到 Agent 运行框架：理解三者层次、历史对话、工具调用、参数差异与工程选型。
+      </p>
+
+      <div class="hero-grid">
+        <div class="hero-card">
+          <b>Chat Completions</b>
+          <p>传统消息式模型接口，兼容生态最好，历史和工具循环主要由应用自行管理。</p>
+        </div>
+        <div class="hero-card">
+          <b>Responses API</b>
+          <p>OpenAI 新一代统一模型接口，围绕 Item 组织推理、工具、多模态和上下文。</p>
+        </div>
+        <div class="hero-card">
+          <b>Agents SDK</b>
+          <p>建立在模型接口之上的 Agent 运行框架，管理工具循环、Session、Tracing 和编排。</p>
+        </div>
+      </div>
+    </header>
+
+    <section id="overview">
+      <div class="section-kicker">01 · Overview</div>
+      <h2>三者关系：两个接口，一个框架</h2>
+      <div class="flow">
+        <div class="node">业务应用</div><div class="arrow">→</div>
+        <div class="node">Agents SDK</div><div class="arrow">→</div>
+        <div class="node">Responses API / Chat Completions</div><div class="arrow">→</div>
+        <div class="node">模型</div>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <span class="badge">模型接口</span>
+          <h3>Chat Completions</h3>
+          <p class="muted">以 messages 为中心，适合传统聊天、简单工具调用和多厂商兼容。</p>
+        </div>
+        <div class="card">
+          <span class="badge green">统一接口</span>
+          <h3>Responses API</h3>
+          <p class="muted">以 input / output Item 为中心，适合推理、工具、多模态和 Agent 场景。</p>
+        </div>
+        <div class="card">
+          <span class="badge purple">运行框架</span>
+          <h3>Agents SDK</h3>
+          <p class="muted">负责 Agent Loop、工具执行、Session、Guardrail、Handoff 与 Tracing。</p>
+        </div>
+      </div>
+      <div class="callout success">
+        最重要的结论：Responses API 是底层模型能力，Agents SDK 是上层 Agent 运行框架；Chat Completions 仍是第三方模型兼容最广的接口。
+      </div>
+    </section>
+
+    <section id="chat">
+      <div class="section-kicker">02 · Chat Completions</div>
+      <h2>Chat Completions API：围绕 messages 工作</h2>
+      <p>Chat Completions 的核心，是将模型需要知道的全部上下文按顺序放入 <code>messages</code>。</p>
+      <div class="code-title">基础调用</div>
+      <pre><code>from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-5.6",
+    messages=[
+        {
+            "role": "developer",
+            "content": "你是一个专业的业务分析助手。"
+        },
+        {
+            "role": "user",
+            "content": "查询最近7天风险门店。"
+        }
+    ]
+)
+
+print(response.choices[0].message.content)</code></pre>
+      <div class="callout">
+        Chat Completions 不会自动读取你的数据库历史。应用必须把模型需要知道的 developer、user、assistant、tool 消息重新发送。
+      </div>
+    </section>
+
+    <section id="roles">
+      <div class="section-kicker">03 · Roles</div>
+      <h2>五种常见消息角色</h2>
+      <div class="card">
+        <div class="role">
+          <div class="role-name">developer</div>
+          <div class="role-desc">开发团队给模型设定的稳定规则：身份、业务口径、输出格式、工具规则和安全边界。</div>
+        </div>
+        <div class="role">
+          <div class="role-name">system</div>
+          <div class="role-desc">传统系统指令角色。第三方 OpenAI-compatible 接口中仍很常见；新 OpenAI 模型通常优先使用 developer。</div>
+        </div>
+        <div class="role">
+          <div class="role-name">user</div>
+          <div class="role-desc">用户输入。属于不可信内容，不能仅依赖 Prompt 实现权限控制。</div>
+        </div>
+        <div class="role">
+          <div class="role-name">assistant</div>
+          <div class="role-desc">模型此前的普通回答，或者模型发起的 tool_calls。</div>
+        </div>
+        <div class="role">
+          <div class="role-name">tool</div>
+          <div class="role-desc">应用执行工具后返回给模型的结果，通过 tool_call_id 与前面的调用关联。</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card">
+          <h3>developer 示例</h3>
+          <pre><code>{
+  "role": "developer",
+  "content": """
+你是企业经营数据分析助手。
+
+规则：
+1. 使用中文回答。
+2. 业务数据必须通过工具查询。
+3. 不允许编造数据。
+4. 先给结论，再给依据。
+"""
+}</code></pre>
+        </div>
+        <div class="card">
+          <h3>assistant 工具调用示例</h3>
+          <pre><code>{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_001",
+      "type": "function",
+      "function": {
+        "name": "query_risk_stores",
+        "arguments": "{\"days\":7}"
+      }
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="history">
+      <div class="section-kicker">04 · Conversation History</div>
+      <h2>完整多轮历史是如何形成的</h2>
+      <div class="flow">
+        <div class="node">developer</div><div class="arrow">→</div>
+        <div class="node">user</div><div class="arrow">→</div>
+        <div class="node">assistant</div><div class="arrow">→</div>
+        <div class="node">user</div><div class="arrow">→</div>
+        <div class="node">assistant tool_calls</div><div class="arrow">→</div>
+        <div class="node">tool</div><div class="arrow">→</div>
+        <div class="node">assistant</div>
+      </div>
+      <pre><code>messages = [
+  {
+    "role": "developer",
+    "content": "你是企业经营数据分析助手，业务数据必须通过工具查询。"
+  },
+  {
+    "role": "user",
+    "content": "最近公司的巡店情况怎么样？"
+  },
+  {
+    "role": "assistant",
+    "content": "可以从覆盖率、风险门店和整改闭环几个方面分析。"
+  },
+  {
+    "role": "user",
+    "content": "先看最近7天风险最高的门店。"
+  },
+  {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "call_risk_001",
+        "type": "function",
+        "function": {
+          "name": "query_risk_stores",
+          "arguments": "{\"start_date\":\"2026-07-08\",\"end_date\":\"2026-07-14\",\"limit\":10}"
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_risk_001",
+    "content": "{\"total\":3,\"stores\":[...]}"
+  },
+  {
+    "role": "assistant",
+    "content": "最近7天共发现3家高风险门店，其中杭州西湖店风险最高。"
+  },
+  {
+    "role": "user",
+    "content": "这些门店的整改闭环情况怎么样？"
+  }
+]</code></pre>
+      <div class="callout warning">
+        “这些门店”之所以能被理解，是因为前面的工具调用、工具结果和助手回答都保留在历史中。
+      </div>
+    </section>
+
+    <section id="tools">
+      <div class="section-kicker">05 · Tool Calling</div>
+      <h2>工具定义与工具调用</h2>
+      <p>工具定义只是告诉模型“系统里有哪些能力、参数怎么传”，并不会自动执行数据库查询。</p>
+      <pre><code>tools = [
+  {
+    "type": "function",
+    "function": {
+      "name": "query_risk_stores",
+      "description": "查询指定日期范围内的风险门店。",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "description": "开始日期，YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "结束日期，YYYY-MM-DD"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "all"]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": ["start_date", "end_date", "risk_level", "limit"],
+        "additionalProperties": false
+      }
+    }
+  }
+]</code></pre>
+      <div class="flow">
+        <div class="node">应用发送 tools</div><div class="arrow">→</div>
+        <div class="node">模型返回 tool_calls</div><div class="arrow">→</div>
+        <div class="node">应用执行真实工具</div><div class="arrow">→</div>
+        <div class="node">追加 tool 结果</div><div class="arrow">→</div>
+        <div class="node">模型生成最终答案</div>
+      </div>
+    </section>
+
+    <section id="params">
+      <div class="section-kicker">06 · Parameters</div>
+      <h2>Chat Completions 常用参数</h2>
+      <table>
+        <thead>
+          <tr><th>参数</th><th>作用</th><th>建议</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>model</code></td><td>指定模型</td><td>先确认模型是否支持工具、结构化输出、temperature、stop 等能力。</td></tr>
+          <tr><td><code>temperature</code></td><td>控制随机性</td><td>数据分析和工具调用通常使用 0～0.3；新推理模型未必支持。</td></tr>
+          <tr><td><code>top_p</code></td><td>核采样</td><td>通常与 temperature 二选一调整。</td></tr>
+          <tr><td><code>stop</code></td><td>停止序列</td><td>不是敏感词过滤；部分新模型不支持。</td></tr>
+          <tr><td><code>max_completion_tokens</code></td><td>限制最大输出 Token</td><td>不等于字符数，推理模型还可能包含推理 Token。</td></tr>
+          <tr><td><code>tool_choice</code></td><td>控制是否及如何使用工具</td><td>常见值：auto、none、强制指定某个工具。</td></tr>
+          <tr><td><code>parallel_tool_calls</code></td><td>允许并行工具调用</td><td>适合读取类操作，写操作要谨慎。</td></tr>
+          <tr><td><code>n</code></td><td>生成多个候选答案</td><td>Agent 场景通常固定为 1。</td></tr>
+          <tr><td><code>stream</code></td><td>流式输出</td><td>工具参数可能分块返回，需要完整拼接后再解析。</td></tr>
+          <tr><td><code>response_format</code></td><td>结构化输出</td><td>优先使用 JSON Schema。</td></tr>
+          <tr><td><code>store</code></td><td>控制平台存储</td><td>企业应用按合规要求设置。</td></tr>
+          <tr><td><code>metadata</code></td><td>非敏感跟踪字段</td><td>不要放 API Key、Token、密码和个人敏感信息。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="grid-2" style="margin-top:18px">
+        <div class="card">
+          <h3>temperature</h3>
+          <p class="muted">越低越稳定，越高越发散，但低 temperature 不等于高正确率。</p>
+          <pre><code>temperature=0.2</code></pre>
+        </div>
+        <div class="card">
+          <h3>stop sequence</h3>
+          <p class="muted">更准确的名称是“停止序列”，不是敏感词过滤。</p>
+          <pre><code>stop=["&lt;END&gt;", "【回答结束】"]</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="responses">
+      <div class="section-kicker">07 · Responses API</div>
+      <h2>Responses API：新一代统一模型接口</h2>
+      <pre><code>from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-5.6",
+    instructions="你是一个专业的业务分析助手。",
+    input="查询最近7天风险门店。"
+)
+
+print(response.output_text)</code></pre>
+      <div class="compare-strip">
+        <div class="compare-item"><strong>messages → input</strong><span class="muted">输入不再局限于传统消息列表。</span></div>
+        <div class="compare-item"><strong>developer/system → instructions</strong><span class="muted">稳定规则有了独立入口。</span></div>
+        <div class="compare-item"><strong>choices → output</strong><span class="muted">输出由类型化 Item 组成。</span></div>
+      </div>
+    </section>
+
+    <section id="items">
+      <div class="section-kicker">08 · Item Model</div>
+      <h2>Responses API 的核心：Item</h2>
+      <p>Chat Completions 主要围绕 Message；Responses API 主要围绕 Item。</p>
+      <div class="grid-3">
+        <div class="card"><h3>reasoning</h3><p class="muted">推理相关输出或摘要。</p></div>
+        <div class="card"><h3>function_call</h3><p class="muted">模型发起函数调用。</p></div>
+        <div class="card"><h3>message</h3><p class="muted">最终对用户可见的回答。</p></div>
+        <div class="card"><h3>web_search_call</h3><p class="muted">托管网页搜索调用。</p></div>
+        <div class="card"><h3>file_search_call</h3><p class="muted">文件检索调用。</p></div>
+        <div class="card"><h3>computer_call</h3><p class="muted">计算机操作类调用。</p></div>
+      </div>
+      <pre><code>{
+  "output": [
+    {
+      "type": "reasoning"
+    },
+    {
+      "type": "function_call",
+      "name": "query_risk_stores",
+      "call_id": "call_001",
+      "arguments": "{\"days\":7}"
+    }
+  ]
+}</code></pre>
+      <div class="callout">
+        Responses API 不只是把参数改名，而是把模型执行过程拆成多个类型明确的 Item。
+      </div>
+    </section>
+
+    <section>
+      <div class="section-kicker">09 · Conversation State</div>
+      <h2>Responses API 的多轮上下文</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>方式一：手工传递 input 历史</h3>
+          <pre><code>response = client.responses.create(
+    model="gpt-5.6",
+    instructions="你是业务分析助手。",
+    input=[
+        {"role": "user", "content": "查询高风险门店"},
+        {"role": "assistant", "content": "共有3家"},
+        {"role": "user", "content": "整改情况呢？"}
+    ]
+)</code></pre>
+        </div>
+        <div class="card">
+          <h3>方式二：previous_response_id</h3>
+          <pre><code>response2 = client.responses.create(
+    model="gpt-5.6",
+    instructions="你是业务分析助手。",
+    previous_response_id=response1.id,
+    input="这些门店整改情况怎么样？"
+)</code></pre>
+        </div>
+      </div>
+      <div class="callout warning">
+        企业应用仍应保存自己的会话、工具调用和审计数据。previous_response_id 更适合作为模型上下文能力，而不是业务数据库的替代品。
+      </div>
+    </section>
+
+    <section id="mapping">
+      <div class="section-kicker">10 · Mapping</div>
+      <h2>Chat Completions 与 Responses API 映射</h2>
+      <table>
+        <thead><tr><th>Chat Completions</th><th>Responses API</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>messages</code></td><td><code>input</code></td><td>输入历史</td></tr>
+          <tr><td><code>developer/system</code></td><td><code>instructions</code></td><td>开发者稳定规则</td></tr>
+          <tr><td><code>choices[0].message.content</code></td><td><code>output_text</code></td><td>最终文本便利字段</td></tr>
+          <tr><td><code>choices</code></td><td><code>output</code></td><td>Responses 输出为类型化 Item</td></tr>
+          <tr><td><code>max_completion_tokens</code></td><td><code>max_output_tokens</code></td><td>输出限制</td></tr>
+          <tr><td><code>message.tool_calls</code></td><td><code>function_call Item</code></td><td>模型发起工具调用</td></tr>
+          <tr><td><code>role=tool</code></td><td><code>function_call_output</code></td><td>工具结果</td></tr>
+          <tr><td><code>tool_call_id</code></td><td><code>call_id</code></td><td>关联工具调用</td></tr>
+          <tr><td><code>response_format</code></td><td><code>text.format</code></td><td>结构化输出</td></tr>
+          <tr><td><code>stop</code></td><td>无直接对应</td><td>通过格式、长度或应用层控制</td></tr>
+          <tr><td><code>n</code></td><td>无直接对应</td><td>Responses 通常一次返回一份响应</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="agents">
+      <div class="section-kicker">11 · Agents SDK</div>
+      <h2>Agents SDK：在模型接口之上的 Agent 运行框架</h2>
+      <pre><code>from agents import Agent, Runner, function_tool
+
+@function_tool
+def query_risk_stores(days: int) -> str:
+    return "真实业务查询结果"
+
+agent = Agent(
+    name="业务分析助手",
+    instructions="业务数据必须通过工具查询，禁止编造。",
+    tools=[query_risk_stores]
+)
+
+result = Runner.run_sync(
+    agent,
+    "查询最近7天风险门店，并分析主要问题。"
+)
+
+print(result.final_output)</code></pre>
+
+      <div class="grid-3">
+        <div class="card"><h3>Agent Loop</h3><p class="muted">自动管理“模型 → 工具 → 模型”的循环。</p></div>
+        <div class="card"><h3>Session</h3><p class="muted">支持多轮运行状态与会话管理。</p></div>
+        <div class="card"><h3>Tracing</h3><p class="muted">追踪模型调用、工具调用和运行链路。</p></div>
+        <div class="card"><h3>Guardrails</h3><p class="muted">输入、输出和工具执行前后的约束机制。</p></div>
+        <div class="card"><h3>Handoffs</h3><p class="muted">把任务交给另一个专业 Agent。</p></div>
+        <div class="card"><h3>MCP / Tools</h3><p class="muted">更方便地接入工具与 MCP 服务。</p></div>
+      </div>
+
+      <div class="callout warning">
+        Agents SDK 不会自动解决多租户、数据权限、审批、幂等、限流、事务和审计。它是 Agent Runtime，不是完整业务平台。
+      </div>
+    </section>
+
+    <section id="compare">
+      <div class="section-kicker">12 · Comparison</div>
+      <h2>三者完整对比</h2>
+      <table>
+        <thead>
+          <tr><th>对比项</th><th>Chat Completions</th><th>Responses API</th><th>Agents SDK</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>定位</td><td>传统模型接口</td><td>统一模型接口</td><td>Agent 运行框架</td></tr>
+          <tr><td>核心结构</td><td>Message</td><td>Item</td><td>Agent / Runner / Tool</td></tr>
+          <tr><td>多轮对话</td><td>应用传 messages</td><td>input / response 链</td><td>Session</td></tr>
+          <tr><td>工具循环</td><td>应用自己实现</td><td>应用自己实现</td><td>SDK 管理</td></tr>
+          <tr><td>推理模型</td><td>传统兼容</td><td>更完整</td><td>使用底层模型能力</td></tr>
+          <tr><td>多 Agent</td><td>自己实现</td><td>自己实现</td><td>Handoff / Agent as Tool</td></tr>
+          <tr><td>Tracing</td><td>自己实现</td><td>请求级</td><td>运行链路级</td></tr>
+          <tr><td>第三方兼容</td><td>最好</td><td>相对较弱</td><td>依赖 Provider 适配</td></tr>
+          <tr><td>开发工作量</td><td>Agent 场景较大</td><td>中等</td><td>相对较小</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="choice">
+      <div class="section-kicker">13 · Decision Guide</div>
+      <h2>如何选型</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="badge">普通聊天 / 多厂商兼容</span>
+          <h3>选择 Chat Completions</h3>
+          <p class="muted">适合传统问答、简单工具调用，以及 DeepSeek、通义、智谱等 OpenAI-compatible 接口。</p>
+        </div>
+        <div class="card">
+          <span class="badge green">新 OpenAI 应用</span>
+          <h3>优先 Responses API</h3>
+          <p class="muted">适合推理、多模态、统一工具、Web Search、File Search、Computer Use 和 MCP。</p>
+        </div>
+        <div class="card">
+          <span class="badge purple">复杂 Agent</span>
+          <h3>选择 Agents SDK</h3>
+          <p class="muted">适合连续调用多个工具、Session、Tracing、Guardrails、Handoff 和多 Agent 编排。</p>
+        </div>
+        <div class="card">
+          <span class="badge">混合架构</span>
+          <h3>OpenAI + 第三方模型</h3>
+          <p class="muted">OpenAI 走 Responses API，第三方模型走 Chat Completions Adapter，上层统一由业务服务或 Agents SDK 管理。</p>
+        </div>
+      </div>
+
+      <div class="callout success">
+        最终记住四句话：Chat Completions 是传统聊天接口；Responses API 是新一代统一模型接口；Agents SDK 是 Agent 运行框架；企业权限与业务安全仍由业务系统负责。
+      </div>
+
+      <div class="pill-list">
+        <span class="pill">Message → Item</span>
+        <span class="pill">messages → input</span>
+        <span class="pill">tool_calls → function_call</span>
+        <span class="pill">Agent Loop → Agents SDK</span>
+        <span class="pill">权限边界 → 业务系统</span>
+      </div>
+    </section>
+
+    <div class="footer">
+      OpenAI API 团队内部分享材料 · 单文件 HTML · 可直接浏览器打开或打印为 PDF
+    </div>
+  </main>
+</div>
+</body>
+</html>

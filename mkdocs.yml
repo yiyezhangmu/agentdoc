@@ -1,0 +1,101 @@
+site_name: Jeffrey 知识库
+site_description: Jeffrey 的个人知识库
+site_author: Jeffrey
+site_url: http://127.0.0.1:3164
+
+dev_addr: 127.0.0.1:3164
+
+extra_css:
+  - assets/stylesheets/custom.css
+
+extra_javascript:
+  - assets/javascripts/sidebar-toggle.js
+
+theme:
+  name: material
+  language: zh
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.expand
+    - navigation.drawer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.select
+    - header.autohide
+    - announce.dismiss
+    - navigation.instant
+    - toc.follow
+    - toc.sticky
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: cyan
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: cyan
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  font:
+    text: Inter
+    code: JetBrains Mono
+  custom_dir: overrides
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.magiclink
+
+nav:
+  - 首页: index.md
+  - AI 与 Agent:
+      - 概览: ai-agent/index.md
+      - OpenAI:
+          - Chat Completions、Responses 与 Agents SDK:
+              - 知识概览: ai-agent/openai/chat-completions-responses-agents/index.md
+              - 丰富版 HTML: ai-agent/openai/chat-completions-responses-agents/openai_api_team_sharing.html
+      - MCP: ai-agent/mcp/index.md
+      - RAG: ai-agent/rag/index.md
+  - 架构设计: architecture/index.md
+  - 数据库: database/index.md
+  - DevOps: devops/index.md
+  - 云平台: cloud/index.md
+  - 产品: product/index.md
+  - 其他: miscellaneous/index.md
