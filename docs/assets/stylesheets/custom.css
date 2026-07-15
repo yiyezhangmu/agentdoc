@@ -511,8 +511,10 @@ body {
 
 .md-typeset .mermaid svg {
   display: block;
-  min-width: 40rem;
-  max-width: 100%;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  max-height: 34rem;
   height: auto;
   margin: 0 auto;
   font-family: Inter, system-ui, sans-serif !important;
@@ -682,9 +684,6 @@ body.toc-hidden .reading-layout-toggle--right svg {
     width: 12.1rem;
   }
 
-  .md-typeset .mermaid svg {
-    min-width: 34rem;
-  }
 }
 
 @media (max-width: 48em) {
@@ -712,10 +711,6 @@ body.toc-hidden .reading-layout-toggle--right svg {
 
   .md-typeset .mermaid {
     padding: 0.85rem;
-  }
-
-  .md-typeset .mermaid svg {
-    min-width: 38rem;
   }
 
   .reading-layout-toggle {

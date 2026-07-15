@@ -44,7 +44,7 @@ if (typeof mermaid !== 'undefined') {
     fontFamily: 'Inter, Segoe UI, system-ui, sans-serif',
     flowchart: {
       htmlLabels: true,
-      useMaxWidth: true,
+      useMaxWidth: false,
       curve: 'basis'
     }
   });
