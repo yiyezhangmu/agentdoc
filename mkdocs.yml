@@ -9,7 +9,10 @@ extra_css:
   - assets/stylesheets/custom.css
 
 extra_javascript:
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
   - assets/javascripts/sidebar-toggle.js
+  - assets/javascripts/content-enhancements.js
+  - assets/javascripts/mermaid-renderer.js
 
 theme:
   name: material
@@ -47,12 +50,11 @@ theme:
       toggle:
         icon: material/brightness-4
         name: 切换到浅色模式
-  font:
-    text: Inter
-    code: JetBrains Mono
+  font: false
   custom_dir: overrides
 
 plugins:
+  - privacy
   - search:
       lang:
         - zh
@@ -75,7 +77,11 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid-source
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.emoji:
@@ -99,3 +105,4 @@ nav:
   - 云平台: cloud/index.md
   - 产品: product/index.md
   - 其他: miscellaneous/index.md
+  - 本地目录: file:///D:/dev/docs-jeffrey/docs/

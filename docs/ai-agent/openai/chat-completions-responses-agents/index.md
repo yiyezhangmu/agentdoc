@@ -12,12 +12,20 @@
 
 ## 1. 三者处于什么层次
 
-```text
-Chat Completions API ─┐
-                      ├─ 模型调用接口
-Responses API ────────┘
-          ↑
-OpenAI Agents SDK ───── Agent 开发与运行框架
+```mermaid
+flowchart TB
+    SDK["OpenAI Agents SDK<br/>Agent 开发与运行框架"]
+    CHAT["Chat Completions API"]
+    RESP["Responses API"]
+    MODEL["模型调用接口"]
+
+    SDK --> CHAT
+    SDK --> RESP
+    CHAT --> MODEL
+    RESP --> MODEL
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class SDK accent;
 ```
 
 | 技术 | 定位 | 主要作用 |
@@ -84,19 +92,10 @@ tool
 
 `developer` 用于承载开发团队定义的稳定规则：
 
-```python
+```json
 {
     "role": "developer",
-    "content": """
-你是企业经营数据分析助手。
-
-必须遵守：
-1. 使用中文回答。
-2. 先给管理结论，再给数据依据。
-3. 业务数据必须通过工具查询。
-4. 不允许编造业务数据。
-5. 工具返回权限错误时，不得绕过权限。
-"""
+    "content": "你是企业经营数据分析助手。\n\n必须遵守：\n1. 使用中文回答。\n2. 先给管理结论，再给数据依据。\n3. 业务数据必须通过工具查询。\n4. 不允许编造业务数据。\n5. 工具返回权限错误时，不得绕过权限。"
 }
 ```
 
@@ -114,7 +113,7 @@ tool
 
 `system` 是早期 Chat Completions 中常用的系统指令角色：
 
-```python
+```json
 {
     "role": "system",
     "content": "你是一个专业的业务分析助手。"
@@ -127,7 +126,7 @@ tool
 
 `user` 表示用户输入：
 
-```python
+```json
 {
     "role": "user",
     "content": "查询最近7天的高风险门店。"
@@ -142,7 +141,7 @@ tool
 
 普通回答：
 
-```python
+```json
 {
     "role": "assistant",
     "content": "最近7天共发现3家高风险门店。"
@@ -151,10 +150,10 @@ tool
 
 工具调用：
 
-```python
+```json
 {
     "role": "assistant",
-    "content": None,
+    "content": null,
     "tool_calls": [
         {
             "id": "call_001",
@@ -172,22 +171,11 @@ tool
 
 `tool` 表示应用执行工具后返回给模型的结果：
 
-```python
+```json
 {
     "role": "tool",
     "tool_call_id": "call_001",
-    "content": """
-{
-  "total": 3,
-  "stores": [
-    {
-      "store_id": "S001",
-      "store_name": "杭州西湖店",
-      "risk_score": 91
-    }
-  ]
-}
-"""
+    "content": "{\"total\":3,\"stores\":[{\"store_id\":\"S001\",\"store_name\":\"杭州西湖店\",\"risk_score\":91}]}"
 }
 ```
 
@@ -290,16 +278,15 @@ tools = [
 
 工具定义本身不会自动执行数据库查询。
 
-```text
-应用发送 tools
-    ↓
-模型返回 tool_calls
-    ↓
-应用执行真实工具
-    ↓
-应用追加 tool 结果
-    ↓
-模型生成最终答案
+```mermaid
+flowchart TD
+    A["应用发送 tools"] --> B["模型返回 tool_calls"]
+    B --> C["应用执行真实工具"]
+    C --> D["应用追加 tool 结果"]
+    D --> E["模型生成最终答案"]
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class A,E accent;
 ```
 
 ---
@@ -545,7 +532,7 @@ for item in response.output:
 
 工具执行完成后：
 
-```python
+```json
 {
     "type": "function_call_output",
     "call_id": "call_001",
@@ -628,12 +615,15 @@ Message
 
 执行过程：
 
-```text
-user message
-assistant message
-assistant tool_calls
-tool message
-assistant message
+```mermaid
+flowchart LR
+    A["user message"] --> B["assistant message"]
+    B --> C["assistant tool_calls"]
+    C --> D["tool message"]
+    D --> E["assistant message"]
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class A,E accent;
 ```
 
 ### Responses API
@@ -646,12 +636,15 @@ Item
 
 执行过程：
 
-```text
-user message
-reasoning item
-function_call item
-function_call_output item
-assistant message
+```mermaid
+flowchart LR
+    A["user message"] --> B["reasoning item"]
+    B --> C["function_call item"]
+    C --> D["function_call_output item"]
+    D --> E["assistant message"]
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class A,E accent;
 ```
 
 Responses API 更适合承载推理、多模态、托管工具、MCP 和 Agent 场景。
@@ -702,30 +695,34 @@ Agents SDK 主要提供：
 
 直接使用 API：
 
-```text
-调用模型
-  ↓
-检查工具调用
-  ↓
-解析参数
-  ↓
-执行工具
-  ↓
-回传工具结果
-  ↓
-再次调用模型
-  ↓
-判断是否完成
+```mermaid
+flowchart TD
+    A["调用模型"] --> B{"是否有工具调用"}
+    B -->|是| C["解析参数"]
+    C --> D["执行工具"]
+    D --> E["回传工具结果"]
+    E --> A
+    B -->|否| F["判断任务是否完成"]
+    F -->|未完成| A
+    F -->|完成| G["返回最终结果"]
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class A,G accent;
 ```
 
 使用 Agents SDK 时，上面的 Agent Loop 通常由 SDK 协助管理。
 
-```text
-Chat Completions / Responses API
-    模型调用接口
+```mermaid
+flowchart TB
+    SDK["Agents SDK<br/>Agent 运行框架"]
+    API["Chat Completions / Responses API<br/>模型调用接口"]
+    MODEL["模型"]
 
-Agents SDK
-    Agent 运行框架
+    SDK --> API
+    API --> MODEL
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class SDK accent;
 ```
 
 ---
@@ -789,39 +786,32 @@ Agents SDK 是 Agent Runtime，不是完整业务平台。
 
 ### 需要兼容国内模型
 
-```text
-OpenAI 模型
-    使用 Responses API
+```mermaid
+flowchart LR
+    APP["应用"] --> TYPE{"模型类型"}
+    TYPE -->|OpenAI 模型| RESP["Responses API"]
+    TYPE -->|DeepSeek、通义、智谱等| CHAT["OpenAI-compatible<br/>Chat Completions"]
 
-DeepSeek、通义、智谱等
-    使用 OpenAI-compatible Chat Completions
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class APP accent;
 ```
 
 ---
 
 ## 20. 最终关系
 
-```text
-                     业务应用
-                        │
-                  Agent 服务
-                        │
-              OpenAI Agents SDK
-              ┌─────────┴─────────┐
-              │ Agent Loop         │
-              │ Tools              │
-              │ Session            │
-              │ Guardrails         │
-              │ Handoffs           │
-              │ Tracing            │
-              └─────────┬─────────┘
-                        │
-          ┌─────────────┴─────────────┐
-          │                           │
-   Responses API             Chat Completions API
-   OpenAI 主要通道             第三方兼容通道
-          │                           │
-      OpenAI 模型              DeepSeek、通义等
+```mermaid
+flowchart TB
+    APP["业务应用"] --> SERVICE["Agent 服务"]
+    SERVICE --> SDK["OpenAI Agents SDK"]
+    SDK --> RUNTIME["Agent Runtime<br/>Agent Loop · Tools · Session<br/>Guardrails · Handoffs · Tracing"]
+    RUNTIME --> RESP["Responses API<br/>OpenAI 主要通道"]
+    RUNTIME --> CHAT["Chat Completions API<br/>第三方兼容通道"]
+    RESP --> OPENAI["OpenAI 模型"]
+    CHAT --> THIRD["DeepSeek、通义等"]
+
+    classDef accent fill:#10a37f,color:#ffffff,stroke:#0d7f65,stroke-width:2px;
+    class APP,SDK accent;
 ```
 
 最终记住四句话：
