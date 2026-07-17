@@ -2,14 +2,19 @@ site_name: Jeffrey 知识库
 site_description: Jeffrey 的个人知识库
 site_author: Jeffrey
 site_url: http://127.0.0.1:3164
+repo_url: https://github.com/yiyezhangmu/agentdoc
+repo_name: yiyezhangmu/agentdoc
+edit_uri: edit/main/docs/
 
 dev_addr: 127.0.0.1:3164
+
+exclude_docs: |
+  巡店/巡店AI/
 
 extra_css:
   - assets/stylesheets/custom.css
 
 extra_javascript:
-  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
   - assets/javascripts/sidebar-toggle.js
   - assets/javascripts/content-enhancements.js
   - assets/javascripts/mermaid-renderer.js
@@ -30,6 +35,7 @@ theme:
     - search.highlight
     - content.code.copy
     - content.code.select
+    - content.action.edit
     - header.autohide
     - announce.dismiss
     - navigation.instant
@@ -93,16 +99,32 @@ nav:
   - 首页: index.md
   - AI 与 Agent:
       - 概览: ai-agent/index.md
+      - Agent 工程: ai-agent/agent-engineering/index.md
       - OpenAI:
           - Chat Completions、Responses 与 Agents SDK:
-              - 知识概览: ai-agent/openai/chat-completions-responses-agents/index.md
+              - 接口与 Agents SDK 总览: ai-agent/openai/chat-completions-responses-agents/index.md
               - 丰富版 HTML: ai-agent/openai/chat-completions-responses-agents/openai_api_team_sharing.html
-      - MCP: ai-agent/mcp/index.md
-      - RAG: ai-agent/rag/index.md
   - 架构设计: architecture/index.md
-  - 数据库: database/index.md
-  - DevOps: devops/index.md
-  - 云平台: cloud/index.md
-  - 产品: product/index.md
-  - 其他: miscellaneous/index.md
+  - 巡店:
+      - 概览: 巡店/index.md
+      - 好多店 Agent:
+          - 文档包概览: 巡店/好多店AGENT/README.md
+          - 规划与总体设计:
+              - 需求文档: 巡店/好多店AGENT/docs/01-好多店_AI_Native_业务执行系统需求文档_V0.1.md
+              - 总体设计: 巡店/好多店AGENT/docs/02-好多店_AI_Native_业务执行系统总体设计文档_V0.1.md
+              - AI 岗位与员工规划: 巡店/好多店AGENT/docs/03-好多店_AI岗位_AI员工_Skill_Workflow_Case整体规划_V0.1.md
+              - 技术设计: 巡店/好多店AGENT/docs/04-好多店_AI_Native_业务执行系统技术设计文档_V0.1.md
+          - 核心能力详细设计:
+              - Agent Service: 巡店/好多店AGENT/docs/05-好多店_AI_Native_Agent_Service详细设计文档_V0.1.md
+              - Skill 体系: 巡店/好多店AGENT/docs/06-好多店_AI_Native_Skill体系详细设计文档_V0.1.md
+              - Workflow 流程: 巡店/好多店AGENT/docs/07-好多店_AI_Native_Workflow流程详细设计文档_V0.1.md
+              - MCP Tool 规范: 巡店/好多店AGENT/docs/08-好多店_AI_Native_MCP_Tool设计规范_V0.1.md
+              - 业务系统对接规划: 巡店/好多店AGENT/docs/09-好多店_AI_Native_业务系统对接规划_V0.1.md
+          - 附录:
+              - AI 巡店业务代码与事务数据分析: 巡店/好多店AGENT/docs/10-好多店_AI巡店业务代码与事务数据分析_V0.1.md
+              - 对象关系定义: 巡店/好多店AGENT/docs/附录A-好多店_AI岗位_AI员工_Skill_流程_Case关系定义_V0.1.md
+  - 其他:
+      - 概览: miscellaneous/index.md
+      - 数据库: database/index.md
+      - DevOps: devops/index.md
   - 本地目录: file:///D:/dev/docs-jeffrey/docs/

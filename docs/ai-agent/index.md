@@ -14,17 +14,11 @@
 
   [阅读 →](openai/chat-completions-responses-agents/index.md)
 
-- **Model Context Protocol (MCP)**
+- **Agent 工程：提示词、上下文、记忆与 Harness**
 
-  探索 MCP 的核心概念、架构设计与实际应用案例。
+  理解四类工程问题的职责边界，以及运行控制、安全护栏、评估和可观测性的落地方式。
 
-  [阅读 →](mcp/index.md)
-
-- **RAG 检索增强生成**
-
-  知识库构建、向量检索与检索增强生成技术实践。
-
-  [阅读 →](rag/index.md)
+  [阅读 →](agent-engineering/index.md)
 
 </div>
 
@@ -46,6 +40,8 @@
 - **工具调用**：与外部系统交互
 - **记忆管理**：短期/长期记忆
 - **规划能力**：多步任务拆解
+
+提示词、上下文、长期记忆和 Harness 的完整关系，参见 [Agent 工程专题](agent-engineering/index.md)。
 
 ---
 

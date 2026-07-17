@@ -56,17 +56,11 @@
 
   [深入探索 →](devops/index.md)
 
-- **☁️ 云平台**
+- **🧭 巡店**
 
-  阿里云服务、对象存储、网络架构与云原生技术实践。
+  好多店 AI Native 业务执行系统及巡店相关设计文档。
 
-  [深入探索 →](cloud/index.md)
-
-- **🎯 产品设计**
-
-  产品规划方法论、业务分析框架与方案设计经验沉淀。
-
-  [深入探索 →](product/index.md)
+  [深入探索 →](巡店/index.md)
 
 </div>
 
@@ -81,18 +75,6 @@
   深入理解 OpenAI 三种开发方式的关系与适用场景。
 
   [阅读全文 →](ai-agent/openai/chat-completions-responses-agents/index.md)
-
-- **Model Context Protocol (MCP)**
-
-  探索 MCP 的核心概念、架构设计与实际应用案例。
-
-  [阅读全文 →](ai-agent/mcp/index.md)
-
-- **RAG 检索增强生成**
-
-  知识库构建、向量检索与检索增强生成技术实践。
-
-  [阅读全文 →](ai-agent/rag/index.md)
 
 </div>
 
