@@ -1,28 +1,13 @@
 {
   "package": "好多店 AI Native 业务执行系统文档包",
   "version": "V0.1",
-  "generated_at": "2026-07-17T11:00:30",
+  "generated_at": "2026-07-18T00:13:56",
   "file_count": 16,
   "files": [
     {
       "path": "README.md",
-      "size_bytes": 3861,
-      "sha256": "6b934f7373f8a84a57bc592e52743834008491560fa3c1f5ee08ba52955288f7"
-    },
-    {
-      "path": "assets/ai_岗位与技能图谱.png",
-      "size_bytes": 1540734,
-      "sha256": "b8c0c4e7e3af9453c727c67d378b3c89b23191cb5b513c5c96070b74e5385bd2"
-    },
-    {
-      "path": "assets/ai员工体系规划文档概览.png",
-      "size_bytes": 1607211,
-      "sha256": "8aa74855e866d1bc1b6405a44d245c096dfbf34ede95a1b3c0d609e7b15c60a1"
-    },
-    {
-      "path": "assets/ai员工创建与管理流程图.png",
-      "size_bytes": 1498972,
-      "sha256": "c2265763f5d69d23be20d8e4fdbeac001450696d1351b90eafedef43f97b85da"
+      "size_bytes": 3396,
+      "sha256": "5e20e735c4b6abc0cb534574fdad23d9fb76cb784d01a13b9c75ab833cb6f930"
     },
     {
       "path": "assets/好多店任务流程与_ai_协作图.png",
@@ -30,59 +15,74 @@
       "sha256": "af92b48ce30ce337df9c22e863443b96258bbdeaa0ca9a22865ffda63baffc31"
     },
     {
-      "path": "docs/01-好多店_AI_Native_业务执行系统需求文档_V0.1.md",
-      "size_bytes": 83593,
-      "sha256": "63ba77587392b96addae0414aebf125f16ef59e76a6a45614d411fca5a086819"
+      "path": "assets/ai_岗位与技能图谱.png",
+      "size_bytes": 1540734,
+      "sha256": "b8c0c4e7e3af9453c727c67d378b3c89b23191cb5b513c5c96070b74e5385bd2"
     },
     {
-      "path": "docs/02-好多店_AI_Native_业务执行系统总体设计文档_V0.1.md",
-      "size_bytes": 7072,
-      "sha256": "bbfdae0c3619adcbc3387cb8062be78bf87a3783597362d42093d2da78483bfc"
+      "path": "assets/ai员工创建与管理流程图.png",
+      "size_bytes": 1498972,
+      "sha256": "c2265763f5d69d23be20d8e4fdbeac001450696d1351b90eafedef43f97b85da"
     },
     {
-      "path": "docs/03-好多店_AI岗位_AI员工_Skill_Workflow_Case整体规划_V0.1.md",
-      "size_bytes": 7987,
-      "sha256": "71fb82c1916be197253e638a232302cc1e52bad7e9b67f7b3c9d753fcec682e5"
+      "path": "assets/ai员工体系规划文档概览.png",
+      "size_bytes": 1607211,
+      "sha256": "8aa74855e866d1bc1b6405a44d245c096dfbf34ede95a1b3c0d609e7b15c60a1"
     },
     {
-      "path": "docs/04-好多店_AI_Native_业务执行系统技术设计文档_V0.1.md",
-      "size_bytes": 8268,
-      "sha256": "7d5590a7f8c9da190401d3948099f8aaf584b77ea2eaf8faa91230251f4b3ec9"
+      "path": "docs/参考-01-AI巡店代码与数据分析.md",
+      "size_bytes": 13486,
+      "sha256": "76ec2a1fe43b5804ea7d43474218d794a740c83b6c1eb3c988a596778ba4bf8e"
     },
     {
-      "path": "docs/05-好多店_AI_Native_Agent_Service详细设计文档_V0.1.md",
-      "size_bytes": 5469,
-      "sha256": "b1060073bd0d86cb276ab09559b5b6336a6305ad8af76e5cfc7f78b88379f656"
+      "path": "docs/测试-01-系统验收计划.md",
+      "size_bytes": 12120,
+      "sha256": "770c831a2da2b061165e57169d34da733f9ef8155ef215db06684b58a92aad97"
     },
     {
-      "path": "docs/06-好多店_AI_Native_Skill体系详细设计文档_V0.1.md",
-      "size_bytes": 6216,
-      "sha256": "8732d6671ffa90c16cba46cf6c5a658d8d06824f7311fed00931ad1e26d49f85"
+      "path": "docs/测试-02-AI检查项规则验证.md",
+      "size_bytes": 9992,
+      "sha256": "23f0da88dbcbae02ed498f5f3ea13ff86edb6c2dacc8a9ab4e2a1f70c6168365"
     },
     {
-      "path": "docs/07-好多店_AI_Native_Workflow流程详细设计文档_V0.1.md",
-      "size_bytes": 28801,
-      "sha256": "ee0e50f4fb39ea1660fd642e7233f5cf7be6f67bfe1debb3387bb58162059b19"
+      "path": "docs/技术-01-总体设计.md",
+      "size_bytes": 8362,
+      "sha256": "fb5aad68c8a01e894fa9c6faa75427b17227fd7bd6c1ac108703b1349ffd8491"
     },
     {
-      "path": "docs/08-好多店_AI_Native_MCP_Tool设计规范_V0.1.md",
-      "size_bytes": 28369,
-      "sha256": "22280fd06e04604d81553ff701f91532da7b143d3a92f08385d5a1a2ae9c3bd4"
+      "path": "docs/技术-02-Agent-Service设计.md",
+      "size_bytes": 7435,
+      "sha256": "1f000f2439036f050a60b3d2400627cfb57b4eee0ab433688e0fb90e5ef74133"
     },
     {
-      "path": "docs/09-好多店_AI_Native_业务系统对接规划_V0.1.md",
-      "size_bytes": 46566,
-      "sha256": "7553a4d25ffd568a717571ae7990b310801c4ac6f756eb4c765a84c73b1f8c32"
+      "path": "docs/技术-03-Skill体系设计.md",
+      "size_bytes": 4340,
+      "sha256": "a55603d0131f72234a4566db1e6a02db96d0022e7205b4404c556ceb950f1955"
     },
     {
-      "path": "docs/10-好多店_AI巡店业务代码与事务数据分析_V0.1.md",
-      "size_bytes": 32110,
-      "sha256": "866c61bfce4c696c68f45e8c63f401cf43e77aaacef675c31e605dba92b90bb3"
+      "path": "docs/技术-04-Workflow流程设计.md",
+      "size_bytes": 10656,
+      "sha256": "c6ab7595d51d0f94b0bda735b71abe58de472e7a50ad0544a3ace68b278e9018"
     },
     {
-      "path": "docs/附录A-好多店_AI岗位_AI员工_Skill_流程_Case关系定义_V0.1.md",
-      "size_bytes": 3911,
-      "sha256": "1664ea09735baa02e39df7ff8281bc22efb0418397b9c5eb381f6431f4876652"
+      "path": "docs/技术-05-Tool与Gateway设计.md",
+      "size_bytes": 10624,
+      "sha256": "de611be7d37fd3fcf3e077d8fc9986a04b89c0f6c4b198a60c78c6a092afd071"
+    },
+    {
+      "path": "docs/技术-06-业务系统对接.md",
+      "size_bytes": 11412,
+      "sha256": "c5389b915022d2b36fa63246a003034c2e87b7c416506a8be9685e80a3407a72"
+    },
+    {
+      "path": "docs/需求-01-产品需求.md",
+      "size_bytes": 25482,
+      "sha256": "c167172daaf7f1609421a032b96bbe62f151b0e89e3c436c854bbab519147f64"
+    },
+    {
+      "path": "docs/需求-02-AI岗位与领域模型.md",
+      "size_bytes": 7416,
+      "sha256": "67e604a2ebd676c86c9b2f609aba2808595ce633258e183195ea4a5ce99c4534"
     }
   ],
   "missing_sources": []

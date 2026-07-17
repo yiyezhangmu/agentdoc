@@ -109,20 +109,21 @@ nav:
       - 概览: 巡店/index.md
       - 好多店 Agent:
           - 文档包概览: 巡店/好多店AGENT/README.md
-          - 规划与总体设计:
-              - 需求文档: 巡店/好多店AGENT/docs/01-好多店_AI_Native_业务执行系统需求文档_V0.1.md
-              - 总体设计: 巡店/好多店AGENT/docs/02-好多店_AI_Native_业务执行系统总体设计文档_V0.1.md
-              - AI 岗位与员工规划: 巡店/好多店AGENT/docs/03-好多店_AI岗位_AI员工_Skill_Workflow_Case整体规划_V0.1.md
-              - 技术设计: 巡店/好多店AGENT/docs/04-好多店_AI_Native_业务执行系统技术设计文档_V0.1.md
-          - 核心能力详细设计:
-              - Agent Service: 巡店/好多店AGENT/docs/05-好多店_AI_Native_Agent_Service详细设计文档_V0.1.md
-              - Skill 体系: 巡店/好多店AGENT/docs/06-好多店_AI_Native_Skill体系详细设计文档_V0.1.md
-              - Workflow 流程: 巡店/好多店AGENT/docs/07-好多店_AI_Native_Workflow流程详细设计文档_V0.1.md
-              - MCP Tool 规范: 巡店/好多店AGENT/docs/08-好多店_AI_Native_MCP_Tool设计规范_V0.1.md
-              - 业务系统对接规划: 巡店/好多店AGENT/docs/09-好多店_AI_Native_业务系统对接规划_V0.1.md
-          - 附录:
-              - AI 巡店业务代码与事务数据分析: 巡店/好多店AGENT/docs/10-好多店_AI巡店业务代码与事务数据分析_V0.1.md
-              - 对象关系定义: 巡店/好多店AGENT/docs/附录A-好多店_AI岗位_AI员工_Skill_流程_Case关系定义_V0.1.md
+          - 需求:
+              - 产品需求: 巡店/好多店AGENT/docs/需求-01-产品需求.md
+              - AI 岗位与领域模型: 巡店/好多店AGENT/docs/需求-02-AI岗位与领域模型.md
+          - 技术:
+              - 总体设计: 巡店/好多店AGENT/docs/技术-01-总体设计.md
+              - Agent Service: 巡店/好多店AGENT/docs/技术-02-Agent-Service设计.md
+              - Skill 体系: 巡店/好多店AGENT/docs/技术-03-Skill体系设计.md
+              - Workflow 流程: 巡店/好多店AGENT/docs/技术-04-Workflow流程设计.md
+              - Tool 与 Gateway: 巡店/好多店AGENT/docs/技术-05-Tool与Gateway设计.md
+              - 业务系统对接: 巡店/好多店AGENT/docs/技术-06-业务系统对接.md
+          - 测试:
+              - 系统验收计划: 巡店/好多店AGENT/docs/测试-01-系统验收计划.md
+              - AI 检查项规则验证: 巡店/好多店AGENT/docs/测试-02-AI检查项规则验证.md
+          - 参考:
+              - AI 巡店代码与数据分析: 巡店/好多店AGENT/docs/参考-01-AI巡店代码与数据分析.md
   - 其他:
       - 概览: miscellaneous/index.md
       - 数据库: database/index.md
