@@ -90,6 +90,9 @@ tool_call_id
 workflow_instance_id
 case_id
 skill_code
+primary_store_id
+profile_snapshot_id
+ranking_population_scope
 allowed_store_ids
 allowed_region_ids
 approval_id
@@ -115,8 +118,11 @@ idempotency_key
   "data": {},
   "meta": {
     "source": "hologres|java_business_system",
+    "dataset_code": "RISK_STORE_DAILY",
     "data_as_of": "2026-07-16",
-    "freshness_status": "FRESH",
+    "refresh_status": "SUCCESS",
+    "refresh_batch_id": "batch_20260716_01",
+    "refresh_completed_at": "2026-07-17 05:20:00",
     "truncated": false,
     "evidence_refs": []
   },
@@ -131,6 +137,8 @@ idempotency_key
 - 返回业务字段和稳定引用，不暴露物理表、Secret 或内部堆栈；
 - 控制总行数和文本大小；
 - 为模型结论提供可引用证据。
+
+Hologres 分析类 Tool 的 `dataset_code` 和 `refresh_*` 元数据由后端 `DataReadinessProvider` 注入，模型不能填写。`refresh_status` 非 `SUCCESS` 时，Tool 不得把零行结果解释为“没有风险”；Java 实时业务查询仍使用其自身的权威状态和发生时间，不强制伪造刷新字段。
 
 ## 6. Tool Gateway 流程
 
@@ -152,11 +160,14 @@ Tool Call
 权限集合：
 
 ```text
-Role allowed tools
-∩ Employee enabled skills
-∩ Skill allowed tools
-∩ Workflow Step allowed tools
-∩ Current scope and risk policy
+Current Skill ∈ Employee enabled skills
+AND Tool ∈ (
+  Role allowed tools
+  ∩ Current Skill allowed tools
+  ∩ Workflow Step allowed tools
+  ∩ Current Workflow/business policy
+)
+AND requested data ∈ Employee current scope
 ```
 
 任一校验失败都必须写入 Tool Call 状态和标准错误码。
@@ -191,7 +202,7 @@ Java Handler 调用 `/internal/agent/**` 专用接口，不复用 Web Controller
 |---|---|
 | `get_risk_alert_detail` | 风险日记录和命中原因 |
 | `get_risk_rule_definition` | 当前租户规则和 Agent 策略 |
-| `get_store_profile` | 门店、区域和状态 |
+| `get_store_basic_info` | Java 权威门店、区域和状态；不等同于 Agent Store Profile |
 | `get_store_responsible_people` | 店长、责任督导和人员有效性 |
 | `get_patrol_record_detail` | 巡店记录和检查项事实 |
 | `get_check_item_failure_history` | 检查项历史失败 |
@@ -219,10 +230,11 @@ Java Handler 调用 `/internal/agent/**` 专用接口，不复用 Web Controller
 前置条件：
 
 - Case、员工和 Scope 当前有效；
-- 审批未过期且参数摘要一致；
+- 审批未过期且 `request_digest` 一致；
 - 店长和当前责任督导解析成功；
 - Question 类型、SLA 和事实模板由后端确定；
 - 幂等键为 `agent-question:{enterpriseId}:{caseId}:v1`。
+- 请求包含与动作、审批、Scope 版本和 `request_digest` 一致的签名授权断言。
 
 同一键重复请求返回原业务对象；同键参数不同返回冲突。业务结果未知时只调用命令查询，不直接重发。
 
@@ -253,7 +265,7 @@ Gateway 校验：
 
 - 动作类型和版本；
 - 业务对象和租户；
-- 参数摘要；
+- `request_digest`；
 - 申请人、审批人和权限；
 - 创建、过期和决定时间；
 - 决定结果和原因。
@@ -313,6 +325,7 @@ BUSINESS_CONFLICT
 DOWNSTREAM_TIMEOUT
 RESULT_UNKNOWN
 PROVIDER_UNAVAILABLE
+REPLAY_REJECTED
 ```
 
 错误响应不包含 SQL、内部 URL、Secret、Token 或堆栈。
@@ -352,3 +365,20 @@ DRAFT -> REVIEWED -> PUBLISHED -> DEPRECATED -> DISABLED
 - 动态发现结果不能直接发布；
 - 租户、Scope、结果大小、超时和审计规则不因协议改变；
 - 外部 MCP 不承担好多店最终权限和安全边界。
+
+## 18. AI 店长 Tool 与隐私投影
+
+首期 `store_manager_review` 只开放以下受控 Tool：
+
+| Tool | 返回 |
+|---|---|
+| `query_store_snapshot` | 主门店状态、风险、巡店、Question 和整改事实 |
+| `query_store_history` | 主门店固定历史窗口的趋势和异常 |
+| `query_store_memory` | 主门店的记忆事件摘要、最终复审和 `FALSE_POSITIVE` 结论 |
+| `query_store_profile` | 主门店画像的巡店分区、标签分区、版本和来源摘要 |
+| `query_store_rank_projection` | 主门店自己的排名、样本量、百分位、指标、时间范围和来源 |
+| `generate_store_weekly_report_draft` | 主门店周报草稿 Artifact |
+
+`query_store_rank_projection` 的 `primary_store_id` 和 `ranking_population_scope` 由后端注入。直接所属区域有效门店数达到 10 家时按直接区域计算，少于 10 家时按上上级区域计算；不继续向更上层扩展。查询在数据源或 Handler 内完成聚合，只返回主门店排名投影，不把同区域其他门店行交给 Gateway、模型或普通日志。画像 Tool 首期只返回 `PATROL` 和 `TAG` 分区，未来领域必须显式声明口径和权限后再加入。
+
+AI 店长请求非 `primary_store_id` 门店详情、伪造门店 ID、要求返回排行明细或调用写 Tool 时，Gateway 返回 `PERMISSION_DENIED`/`TOOL_NOT_ALLOWED` 并记录拒绝审计。门店记忆查询同样按主门店和员工 Scope 强制过滤，不能依赖 Prompt 保证隐私。

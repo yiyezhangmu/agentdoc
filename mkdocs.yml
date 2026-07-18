@@ -8,6 +8,9 @@ edit_uri: edit/main/docs/
 
 dev_addr: 127.0.0.1:3164
 
+hooks:
+  - scripts/mermaid_static.py
+
 exclude_docs: |
   巡店/巡店AI/
 
@@ -109,6 +112,7 @@ nav:
       - 概览: 巡店/index.md
       - 好多店 Agent:
           - 文档包概览: 巡店/好多店AGENT/README.md
+          - 白皮书: 巡店/好多店AGENT/docs/白皮书-好多店AI业务项目功能规划与技术架构.md
           - 需求:
               - 产品需求: 巡店/好多店AGENT/docs/需求-01-产品需求.md
               - AI 岗位与领域模型: 巡店/好多店AGENT/docs/需求-02-AI岗位与领域模型.md
@@ -119,6 +123,7 @@ nav:
               - Workflow 流程: 巡店/好多店AGENT/docs/技术-04-Workflow流程设计.md
               - Tool 与 Gateway: 巡店/好多店AGENT/docs/技术-05-Tool与Gateway设计.md
               - 业务系统对接: 巡店/好多店AGENT/docs/技术-06-业务系统对接.md
+              - ADR-001 Runtime 路线: 巡店/好多店AGENT/docs/技术-07-ADR-001-Agent-Runtime路线.md
           - 测试:
               - 系统验收计划: 巡店/好多店AGENT/docs/测试-01-系统验收计划.md
               - AI 检查项规则验证: 巡店/好多店AGENT/docs/测试-02-AI检查项规则验证.md

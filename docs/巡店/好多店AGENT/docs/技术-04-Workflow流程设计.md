@@ -6,14 +6,14 @@
 
 ## 1. 设计边界
 
-Workflow Engine 管理 Agent Service 内跨 Run 的确定性编排、等待和恢复。它位于现有 Responses Runtime 上层，不替代 Java 的 UnifyTask、Question、审批、巡店复核或申诉状态机。
+Workflow Engine 管理 Agent Service 内跨 Run 的确定性编排、等待和恢复。它位于 `AgentRuntime` 上层，不替代 Java 的 UnifyTask、Question、审批、巡店复核或申诉状态机。
 
 ```text
 Workflow Instance
   -> Step Instance
      -> AI Skill Step
         -> Run 1..N
-           -> Responses Runtime / Tool Call
+           -> AgentRuntime / Tool Call
   -> System Rule / Timer / Wait External / Human Review
   -> Case Event / Business Reference
 ```
@@ -26,7 +26,7 @@ Workflow Instance
 workflow_code: risk_store_followup
 version: 1.0.0
 trigger_types:
-  - warehouse.risk.daily.hit
+  - schedule.risk.daily.scan
 steps:
   - code: analyze_risk
     type: AI_SKILL
@@ -69,6 +69,8 @@ workflow_code / workflow_version
 definition_snapshot_json / definition_sha256
 employee_id / employee_snapshot
 scope_snapshot / scope_version
+primary_store_id?
+profile_snapshot_id?
 trigger_type / trigger_id
 case_id?
 status / current_step_code
@@ -93,7 +95,18 @@ error_code / error_message
 
 ### 3.3 Run
 
-Run 是 AI Skill Step 的执行记录。一个 Step 每次重试创建新 Run，不覆盖前次 Run。非 AI Step 不创建伪 Run。
+Run 是 AI Skill Step 的执行记录。一个 Step 每次重试创建新 Run，不覆盖前次 Run。非 AI Step 不创建伪 Run。Run 至少保存：
+
+```text
+run_id
+step_instance_id
+runtime_input_sha256
+provider / model
+attempt_no
+status
+```
+
+`runtime_input_sha256` 是该 Run 使用的不可变业务输入快照摘要。
 
 ### 3.4 Case 与 Business Reference
 
@@ -164,7 +177,7 @@ Case 状态只表达 Agent 内部进度，不映射 Question 或任务状态。
 1. 按 ID 读取实例并校验租户；
 2. 获取实例租约和乐观锁版本；
 3. 加载 Definition、员工和 Scope 快照；
-4. 重新校验员工状态、当前 Scope 和必要权限；
+4. 重新校验员工状态，并以“实例 Scope 快照 ∩ 员工当前独立 Scope”计算恢复范围和必要权限；
 5. 选择唯一可执行 Step；
 6. 创建 Step Attempt 或 Run；
 7. 执行 AI、System Rule、Tool 或等待逻辑；
@@ -187,18 +200,41 @@ Case 状态只表达 Agent 内部进度，不映射 Question 或任务状态。
 重试规则：
 
 - AI 请求和查询 Tool 可在限定次数内使用指数退避；
-- 每次 AI 重试创建新 Run，并分别记录 Token；
+- 每次 AI 重试创建新 Run，并分别记录 `input_tokens`、`output_tokens`、`total_tokens`；
 - 写 Tool 超时或 `RESULT_UNKNOWN` 时只查询原命令，不直接重发；
 - 同一幂等键参数不同返回冲突；
 - 业务拒绝、审批失效和权限不足不自动重试。
+
+AI Step 第一次执行前，Workflow 按 Skill Input Schema 校验业务输入，并将结果保存为 Step 的 `input_snapshot` 和摘要。该 Step 的模型重试必须复用同一快照和 `runtime_input_sha256`，不得在重试中静默重新查询或修改业务输入。业务输入确需重新读取或更新时，Workflow 必须显式进入新的 Step，或生成新的输入版本和摘要。
 
 ## 8. 风险门店 Workflow
 
 ### 8.1 Trigger
 
-默认每日 07:00 读取前一有效统计日风险记录。只有规则显式 `agentEnabled=true` 且存在有效 Agent 策略时创建 Trigger。
+系统每日 07:00 统一扫描前一有效统计日风险记录。刷新未完成时扫描记录 `DATA_NOT_READY`，不创建风险 Trigger 或 Case；只有规则显式 `agentEnabled=true` 且存在有效 Agent 策略时才创建 Trigger。刷新和补数口径见[业务系统对接](技术-06-业务系统对接.md#71)。
 
 风险记录按租户、统计日、门店和规则去重。相同门店和规则的多日命中归并到同一未关闭 Case。
+
+每次扫描都保存一个轻量 `ScheduleScanRecord`，用于证明调度、未就绪、零数据和补跑事实，不发展为通用调度平台：
+
+```text
+enterprise_id
+schedule_code
+stat_date
+dataset_code
+status
+attempt_count
+readiness_snapshot
+source_row_count
+eligible_row_count
+created_trigger_count
+duplicate_trigger_count
+started_at
+completed_at
+error_code
+```
+
+稳定业务键为 `enterprise_id + schedule_code + stat_date`。状态只允许 `RUNNING`、`DATA_NOT_READY`、`SUCCEEDED`、`FAILED`。`source_row_count` 是刷新成功后按数据集条件读到的源记录数；`eligible_row_count` 是通过 Agent 规则、业务过滤和有效范围判断、进入 Trigger 幂等处理前的记录数；`created_trigger_count` 是本次新建 Trigger 数；`duplicate_trigger_count` 是命中既有 Trigger 幂等键的记录数。零风险、未就绪和成功零数据都必须有记录；重复调度或人工补跑复用同一记录并增加 `attempt_count`，每次尝试的详细过程进入 Trace。只有 `refresh_status=SUCCESS` 且 `source_row_count=0` 才能判定成功零业务数据；`created_trigger_count=0` 不能单独证明没有源数据。漏调度通过缺失扫描记录识别。
 
 ### 8.2 流程
 
@@ -209,9 +245,9 @@ flowchart TD
     A --> C[创建或更新 Case]
     C --> M{actionMode}
     M -->|ANALYZE_ONLY| F[安排后续复查]
-    M -->|CREATE_QUESTION| P[人工审批]
+    M -->|CREATE_QUESTION| P[AI 员工人工负责人确认创建]
     P -->|拒绝| F
-    P -->|缺少人员| B[WAITING_MANUAL_ASSIGNMENT]
+    P -->|负责人失效或无审批权限| B[WAITING_MANUAL_ASSIGNMENT]
     P -->|通过| J[创建或返回 Question]
     J --> W[WAITING_EXTERNAL]
     W --> R[定时查询业务事实]
@@ -222,6 +258,8 @@ flowchart TD
 
 ### 8.3 人员与 SLA
 
+- Question 创建前由 AI Employee 当前配置的人工负责人确认；
+- 负责人失效或无动作审批权限只阻断当前写动作，不停用员工或影响其他分析；
 - 整改节点实时解析门店店长岗位 `50000000`；
 - 审批节点实时解析当前责任督导；
 - 两节点默认 `approveType=any`，不默认抄送；
@@ -240,11 +278,11 @@ flowchart TD
 
 ## 9. Question 动作
 
-审批通过后由 `TOOL_ACTION` 调用 Java。请求参数由后端根据已批准草稿确定性构造，模型不能直接填写业务身份、审批或幂等字段。
+AI Employee 人工负责人确认创建后，由 `TOOL_ACTION` 调用 Java。请求参数由后端根据已批准草稿确定性构造，模型不能直接填写业务身份、审批或幂等字段。Java 创建 Question 后再进入店长整改、当前责任督导审批的业务流程，两类审批不能合并。
 
 Question 要求：
 
-- 目标语义为 `agentRisk`，适配期可映射 `common`；
+- 目标语义为正式的 `agentRisk`，不映射为 `common`；
 - 同一 Case 默认一个父 Question 和一个子 Question；
 - Question 自身产生 `QUESTION_ORDER`，不额外创建独立 UnifyTask；
 - 事实字段和来源由后端模板生成；
@@ -281,9 +319,21 @@ Question 要求：
 
 新配置只影响同步后新建 Period，存量 Period 保持原快照。首期不创建 `inspection_batch_id`，不保证同一次调度拆分的全部门店原子切换。
 
-## 12. 外部状态跟进
+## 12. AI 店长与门店记忆
 
-首期只使用定时轮询：
+`store_manager_weekly_report` 绑定 `AI_STORE_MANAGER` 和 `store_manager_review` Skill，按系统统一周报调度生成主门店“门店运营执行复盘”草稿，也支持人工触发。其 `stat_date` 固定表示统计周结束日 `stat_week_end_date`；统计周起止日期单独保存。Workflow 只查询主门店事实、固定历史窗口、门店画像快照和隐私排行投影，不读取其他门店明细。
+
+周报至少包含本周情况、历史变化、异常事项、门店返回/最终复审摘要、误报记忆、待关注事项、数据来源和统计范围。草稿保存为 Agent Artifact，页面可查看和下载，不自动推送、不创建 Question、不发送消息。同一 `employee_id + primary_store_id + stat_week + workflow_code` 使用幂等键，重复运行返回同一草稿版本。
+
+“突发事情”首期只查询已存在的风险或异常事实，不接事件推送。非关键历史或记忆数据不足时输出限制说明；当前权威数据不可用时 Workflow 进入 `WAITING` 并记录 `DATA_NOT_READY`，不得编造结论。发现需整改风险时只生成转交 Artifact，不直接启动风险 Workflow。
+
+### 12.1 门店记忆事件
+
+风险 Case、门店返回、人工图片/Question 复审和 Case 关闭通过确定性服务追加 `PATROL` 领域 `Store Memory Event`，必要时由已确认事件生成 `TAG`。模型输出只能引用记忆，不能直接写入记忆、标签或把临时判断提升为长期事实。最终复审确认误报时追加 `REVIEW_FALSE_POSITIVE`，生成新的门店画像分区并保留原判断、复审证据和操作人；每个 Run 固化 `profile_snapshot_id`。
+
+## 13. 外部状态跟进
+
+首期只使用定时轮询，轮询只做确定性业务状态查询，不默认创建模型 Run：
 
 - 默认间隔 6 小时；
 - 只查询未关闭 Case 关联的 Question、`QUESTION_ORDER` 和 Java 命令记录；
@@ -291,13 +341,13 @@ Question 要求：
 - 状态变化写 Case Event；
 - RocketMQ 业务状态事件不属于当前实现。
 
-## 13. Workflow 完成 Webhook
+## 14. Workflow 完成 Webhook
 
-Workflow Instance 首次进入 `COMPLETED` 后，在状态事务提交完成后异步投递一次 Webhook。失败不重试、不阻塞、不回滚，也不改变 Workflow 或 Case。其他终态首期不回调。
+Workflow Instance 首次进入 `COMPLETED` 后，在状态事务提交完成后异步投递一次 Best Effort Webhook。失败不重试、不重放、不阻塞、不回滚，也不改变 Workflow 或 Case。其他终态首期不回调。
 
 事件 ID 必须稳定，接收方可据此去重。目标 URL 来自固化员工绑定配置，模型不能提供或修改。
 
-## 14. 持久化关系
+## 15. 持久化关系
 
 ```text
 agent_workflow_instance 1---N agent_workflow_step_instance
@@ -310,6 +360,6 @@ agent_workflow_instance 1---N agent_approval
 
 所有表包含 `enterprise_id`、创建更新时间和必要版本字段。实例、步骤、Case、审批、幂等和租约必须有支持业务唯一性的索引；实际 DDL 在实现前结合 MySQL 版本和数据量评审。
 
-## 15. Trace
+## 16. Trace
 
 每次状态迁移记录前后状态、触发原因、执行者、Definition/Skill 版本、关联 Run、Tool、审批、业务引用和错误。页面按 Workflow 时间线展示，不能把内部等待状态误显示为外部业务完成。

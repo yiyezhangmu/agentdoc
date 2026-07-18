@@ -811,6 +811,13 @@ body {
   padding: var(--mermaid-viewport-padding);
   overflow: auto;
   overscroll-behavior: contain;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.md-typeset .mermaid-viewport--dragging {
+  cursor: grabbing;
 }
 
 .md-typeset .mermaid-canvas {
@@ -825,7 +832,13 @@ body {
   white-space: pre-wrap;
 }
 
-.md-typeset .mermaid svg {
+.md-typeset .mermaid--pending {
+  min-height: 4rem;
+  background: var(--chat-surface-strong);
+}
+
+.md-typeset .mermaid svg,
+.md-typeset .mermaid img {
   display: block;
   width: auto;
   min-width: 0;

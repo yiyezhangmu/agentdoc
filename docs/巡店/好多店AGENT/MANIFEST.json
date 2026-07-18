@@ -1,14 +1,9 @@
 {
   "package": "好多店 AI Native 业务执行系统文档包",
   "version": "V0.1",
-  "generated_at": "2026-07-18T00:13:56",
-  "file_count": 16,
+  "generated_at": "2026-07-19T00:23:17+08:00",
+  "file_count": 26,
   "files": [
-    {
-      "path": "README.md",
-      "size_bytes": 3396,
-      "sha256": "5e20e735c4b6abc0cb534574fdad23d9fb76cb784d01a13b9c75ab833cb6f930"
-    },
     {
       "path": "assets/好多店任务流程与_ai_协作图.png",
       "size_bytes": 1543231,
@@ -30,60 +25,114 @@
       "sha256": "8aa74855e866d1bc1b6405a44d245c096dfbf34ede95a1b3c0d609e7b15c60a1"
     },
     {
+      "path": "docs/白皮书-好多店AI业务项目功能规划与技术架构.md",
+      "size_bytes": 22702,
+      "sha256": "2518eb49de7c6db63dff55e556cdb4bb481d585043657bc2cf8d5a9bd0f6db67"
+    },
+    {
       "path": "docs/参考-01-AI巡店代码与数据分析.md",
       "size_bytes": 13486,
       "sha256": "76ec2a1fe43b5804ea7d43474218d794a740c83b6c1eb3c988a596778ba4bf8e"
     },
     {
       "path": "docs/测试-01-系统验收计划.md",
-      "size_bytes": 12120,
-      "sha256": "770c831a2da2b061165e57169d34da733f9ef8155ef215db06684b58a92aad97"
+      "size_bytes": 21737,
+      "sha256": "8e7734d15fbcb6528eed058211e11b06a68b6a59c45b962b6daeaa715fa7b9ba"
     },
     {
       "path": "docs/测试-02-AI检查项规则验证.md",
-      "size_bytes": 9992,
-      "sha256": "23f0da88dbcbae02ed498f5f3ea13ff86edb6c2dacc8a9ab4e2a1f70c6168365"
+      "size_bytes": 10380,
+      "sha256": "916dba74bd6c84f2612be455592f0b5f5881a8b9e06760929c895e4cd80d9860"
     },
     {
       "path": "docs/技术-01-总体设计.md",
-      "size_bytes": 8362,
-      "sha256": "fb5aad68c8a01e894fa9c6faa75427b17227fd7bd6c1ac108703b1349ffd8491"
+      "size_bytes": 10898,
+      "sha256": "24600872e1fc2c909522501cdb47fd2b813051eb7fc9ee1cd4e0211024e7baaa"
     },
     {
       "path": "docs/技术-02-Agent-Service设计.md",
-      "size_bytes": 7435,
-      "sha256": "1f000f2439036f050a60b3d2400627cfb57b4eee0ab433688e0fb90e5ef74133"
+      "size_bytes": 12225,
+      "sha256": "494e91216e2bb5767549dc0b11b61fc72f2a0be43dd424d3be816b2a0e6793e1"
     },
     {
       "path": "docs/技术-03-Skill体系设计.md",
-      "size_bytes": 4340,
-      "sha256": "a55603d0131f72234a4566db1e6a02db96d0022e7205b4404c556ceb950f1955"
+      "size_bytes": 6137,
+      "sha256": "da0977d395d2058dacf30dcf48205ea90ce101958bc7bbd7c881d46a6fdef988"
     },
     {
       "path": "docs/技术-04-Workflow流程设计.md",
-      "size_bytes": 10656,
-      "sha256": "c6ab7595d51d0f94b0bda735b71abe58de472e7a50ad0544a3ace68b278e9018"
+      "size_bytes": 14970,
+      "sha256": "368fa2ad14d61b299bb1dce33f917cfd0419c47d3b4098d6285f5804d204682a"
     },
     {
       "path": "docs/技术-05-Tool与Gateway设计.md",
-      "size_bytes": 10624,
-      "sha256": "de611be7d37fd3fcf3e077d8fc9986a04b89c0f6c4b198a60c78c6a092afd071"
+      "size_bytes": 12925,
+      "sha256": "bd2c2429735130045d6c1523c4d06184553857e3c8e66a2668f72b0ee2fc12c7"
     },
     {
       "path": "docs/技术-06-业务系统对接.md",
-      "size_bytes": 11412,
-      "sha256": "c5389b915022d2b36fa63246a003034c2e87b7c416506a8be9685e80a3407a72"
+      "size_bytes": 19236,
+      "sha256": "93de277cb3849f21df56860affe090ee75a8b3f9dc7d6ad6049753755a94f15b"
+    },
+    {
+      "path": "docs/技术-07-ADR-001-Agent-Runtime路线.md",
+      "size_bytes": 5444,
+      "sha256": "1ee5e817872d7069288ee2b450c9080c2b9d88fdeefe12d104ff038ae20394a3"
     },
     {
       "path": "docs/需求-01-产品需求.md",
-      "size_bytes": 25482,
-      "sha256": "c167172daaf7f1609421a032b96bbe62f151b0e89e3c436c854bbab519147f64"
+      "size_bytes": 40642,
+      "sha256": "0de3453e47c2b9caa3d4c0572167728f38ffad4665d2a85d4b3f79020158dfbc"
     },
     {
       "path": "docs/需求-02-AI岗位与领域模型.md",
-      "size_bytes": 7416,
-      "sha256": "67e604a2ebd676c86c9b2f609aba2808595ce633258e183195ea4a5ce99c4534"
+      "size_bytes": 12546,
+      "sha256": "b487fc5d706e087513d2544374d9ab3e99376b9cbb9acfd26fa9107e750c6697"
+    },
+    {
+      "path": "images/01-AgentRuntime-技术路线对比-4K.png",
+      "size_bytes": 1553469,
+      "sha256": "2f5751087c125694f93f51cb93bc1713bafb7f3e84649c879e212b49cdf87aa8"
+    },
+    {
+      "path": "images/02-项目功能总览-4K.png",
+      "size_bytes": 3842982,
+      "sha256": "99fceab25595c44fe66a773e24cea756122b6d8a5467838989e2b3b4f95b89ac"
+    },
+    {
+      "path": "images/03-AI风险督导业务流程图-4K.png",
+      "size_bytes": 3385791,
+      "sha256": "bb7efa7f6d49173beb1ef2890bbffbedb8d526770b60112f8f6552eab7ed01e6"
+    },
+    {
+      "path": "images/04-AI店长周报与门店记忆流程图-4K.png",
+      "size_bytes": 3401886,
+      "sha256": "0c39605cfa73986b1543734cb89b6a54f540d2b2dc5655e98d6df075a36a7fdc"
+    },
+    {
+      "path": "images/05-技术总体架构-4K.png",
+      "size_bytes": 432434,
+      "sha256": "6167a0207a28b4d8075e09ee6c5b40190d9986a2193d2a9803403da7f09a6cb9"
+    },
+    {
+      "path": "images/06-审批授权断言与Java写动作流程图-4K.png",
+      "size_bytes": 3076301,
+      "sha256": "ee6122bec7b177ede091a19a73f2fcbfc1495086f4e22850f64de50feb1e2f13"
+    },
+    {
+      "path": "images/07-数据就绪与每日扫描流程图-4K.png",
+      "size_bytes": 3713032,
+      "sha256": "f17ffb378d157ce4006a69b1d5905f0051988907d4ad60d00db22e486ecf19c1"
+    },
+    {
+      "path": "images/08-远程工具调用与敏感信息隔离-4K.png",
+      "size_bytes": 458706,
+      "sha256": "d5cf6e5472b1713eb1cc479c6e36f9db6a3f50dc469301d784c28b500bbe6a86"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 4338,
+      "sha256": "51d5a5c9bbbc6dfd57fd3a83546244ff3a4983b6b9523c88944f4fd67f3ad1f7"
     }
-  ],
-  "missing_sources": []
+  ]
 }

@@ -5,6 +5,7 @@ var mermaidZoomStep = 0.25;
 var mermaidRendererScriptUrl = document.currentScript ? document.currentScript.src : '';
 var mermaidLoadPromise = null;
 var mermaidInitialized = false;
+var mermaidLazyObserver = null;
 
 function getMermaidLibraryUrl() {
   var rendererScriptElement = document.querySelector('script[src$="/assets/javascripts/mermaid-renderer.js"]');
@@ -78,15 +79,22 @@ function setupMermaidZoom(container) {
     return;
   }
 
-  var svg = container.querySelector(':scope > svg');
-  if (!svg) {
+  var diagram = container.querySelector(':scope > svg, :scope > img');
+  if (!diagram) {
     return;
   }
 
-  var initialRect = svg.getBoundingClientRect();
-  var viewBox = svg.viewBox && svg.viewBox.baseVal;
-  var baseWidth = initialRect.width || (viewBox && viewBox.width) || 800;
-  var baseHeight = initialRect.height || (viewBox && viewBox.height) || 450;
+  if (diagram.tagName === 'IMG' && !diagram.complete) {
+    diagram.addEventListener('load', function() {
+      setupMermaidZoom(container);
+    }, { once: true });
+    return;
+  }
+
+  var initialRect = diagram.getBoundingClientRect();
+  var viewBox = diagram.viewBox && diagram.viewBox.baseVal;
+  var baseWidth = initialRect.width || diagram.naturalWidth || (viewBox && viewBox.width) || 800;
+  var baseHeight = initialRect.height || diagram.naturalHeight || (viewBox && viewBox.height) || 450;
   var scale = 1;
 
   var toolbar = document.createElement('div');
@@ -105,22 +113,22 @@ function setupMermaidZoom(container) {
   var viewport = document.createElement('div');
   viewport.className = 'mermaid-viewport';
   viewport.setAttribute('tabindex', '0');
-  viewport.setAttribute('aria-label', '可滚动的流程图画布；按住 Ctrl 或 Command 并滚动鼠标滚轮可缩放');
+  viewport.setAttribute('aria-label', '可拖动和滚动的流程图画布；按住 Ctrl 或 Command 并滚动鼠标滚轮可缩放');
 
   var canvas = document.createElement('div');
   canvas.className = 'mermaid-canvas';
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', '流程图');
-  canvas.appendChild(svg);
+  canvas.appendChild(diagram);
   viewport.appendChild(canvas);
   container.appendChild(toolbar);
   container.appendChild(viewport);
 
   function applyScale(nextScale) {
     scale = Math.min(mermaidZoomMax, Math.max(mermaidZoomMin, nextScale));
-    svg.style.width = (baseWidth * scale) + 'px';
-    svg.style.height = (baseHeight * scale) + 'px';
-    svg.style.maxHeight = 'none';
+    diagram.style.width = (baseWidth * scale) + 'px';
+    diagram.style.height = (baseHeight * scale) + 'px';
+    diagram.style.maxHeight = 'none';
     zoomReset.textContent = Math.round(scale * 100) + '%';
     zoomOut.disabled = scale <= mermaidZoomMin;
     zoomIn.disabled = scale >= mermaidZoomMax;
@@ -146,60 +154,153 @@ function setupMermaidZoom(container) {
     applyScale(scale + (event.deltaY < 0 ? mermaidZoomStep : -mermaidZoomStep));
   }, { passive: false });
 
+  var dragState = null;
+
+  viewport.addEventListener('pointerdown', function(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return;
+    }
+
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      scrollLeft: viewport.scrollLeft,
+      scrollTop: viewport.scrollTop
+    };
+    viewport.classList.add('mermaid-viewport--dragging');
+    viewport.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+
+  viewport.addEventListener('pointermove', function(event) {
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    viewport.scrollLeft = dragState.scrollLeft - (event.clientX - dragState.startX);
+    viewport.scrollTop = dragState.scrollTop - (event.clientY - dragState.startY);
+    event.preventDefault();
+  });
+
+  function stopMermaidDrag(event) {
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    if (viewport.hasPointerCapture(event.pointerId)) {
+      viewport.releasePointerCapture(event.pointerId);
+    }
+    dragState = null;
+    viewport.classList.remove('mermaid-viewport--dragging');
+  }
+
+  viewport.addEventListener('pointerup', stopMermaidDrag);
+  viewport.addEventListener('pointercancel', stopMermaidDrag);
+
   container.dataset.mermaidZoomBound = 'true';
   applyScale(1);
 }
 
-function setupMermaidDiagrams() {
-  if (!document.querySelector('pre.mermaid-source')) {
+function createMermaidPlaceholder(sourceBlock) {
+  var container = document.createElement('div');
+
+  container.className = 'mermaid mermaid--pending';
+  container.setAttribute('role', 'group');
+  container.setAttribute('aria-label', '流程图');
+  container.setAttribute('aria-busy', 'true');
+  container.style.minHeight = sourceBlock.offsetHeight + 'px';
+  container.mermaidSource = sourceBlock.textContent.trim();
+  sourceBlock.replaceWith(container);
+
+  return container;
+}
+
+function renderMermaidDiagram(container) {
+  if (container.dataset.mermaidBound === 'true') {
     return;
   }
 
+  container.dataset.mermaidBound = 'true';
+  var diagramId = 'mermaid-diagram-' + mermaidDiagramSequence++;
+
   loadMermaidLibrary()
-    .then(renderMermaidDiagrams)
+    .then(function() {
+      return mermaid.render(diagramId, container.mermaidSource);
+    })
+    .then(function(result) {
+      container.innerHTML = result.svg;
+      container.classList.remove('mermaid--pending');
+      container.removeAttribute('aria-busy');
+      container.style.minHeight = '';
+      setupMermaidZoom(container);
+      if (result.bindFunctions) {
+        result.bindFunctions(container);
+      }
+    })
     .catch(function(error) {
-      document.querySelectorAll('pre.mermaid-source').forEach(function(sourceBlock) {
-        sourceBlock.classList.add('mermaid--error');
-        sourceBlock.textContent = '流程图渲染失败：' + error.message;
-      });
+      container.classList.remove('mermaid--pending');
+      container.removeAttribute('aria-busy');
+      container.style.minHeight = '';
+      container.classList.add('mermaid--error');
+      container.textContent = '流程图渲染失败：' + error.message;
     });
 }
 
 function renderMermaidDiagrams() {
   var diagrams = document.querySelectorAll('pre.mermaid-source');
 
+  if (!diagrams.length) {
+    return;
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    diagrams.forEach(function(sourceBlock) {
+      renderMermaidDiagram(createMermaidPlaceholder(sourceBlock));
+    });
+    return;
+  }
+
+  if (mermaidLazyObserver) {
+    mermaidLazyObserver.disconnect();
+  }
+
+  mermaidLazyObserver = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) {
+        return;
+      }
+
+      observer.unobserve(entry.target);
+      renderMermaidDiagram(entry.target);
+    });
+  }, { rootMargin: '800px 0px' });
+
   diagrams.forEach(function(sourceBlock) {
     if (sourceBlock.dataset.mermaidBound === 'true') {
       return;
     }
 
-    sourceBlock.dataset.mermaidBound = 'true';
-    var source = sourceBlock.textContent.trim();
-    var container = document.createElement('div');
-    var diagramId = 'mermaid-diagram-' + mermaidDiagramSequence++;
+    mermaidLazyObserver.observe(createMermaidPlaceholder(sourceBlock));
+  });
+}
 
-    container.className = 'mermaid';
-    container.setAttribute('role', 'group');
-    container.setAttribute('aria-label', '流程图（支持缩放）');
-    sourceBlock.replaceWith(container);
+function setupMermaidDiagrams() {
+  renderMermaidDiagrams();
+}
 
-    mermaid.render(diagramId, source)
-      .then(function(result) {
-        container.innerHTML = result.svg;
-        setupMermaidZoom(container);
-        if (result.bindFunctions) {
-          result.bindFunctions(container);
-        }
-      })
-      .catch(function(error) {
-        container.classList.add('mermaid--error');
-        container.textContent = '流程图渲染失败：' + error.message;
-      });
+function setupMermaidStaticDiagrams() {
+  document.querySelectorAll('.mermaid-static').forEach(function(container) {
+    setupMermaidZoom(container);
   });
 }
 
 document.addEventListener('DOMContentLoaded', setupMermaidDiagrams);
+document.addEventListener('DOMContentLoaded', setupMermaidStaticDiagrams);
 
 if (typeof document$ !== 'undefined') {
-  document$.subscribe(setupMermaidDiagrams);
+  document$.subscribe(function() {
+    setupMermaidDiagrams();
+    setupMermaidStaticDiagrams();
+  });
 }

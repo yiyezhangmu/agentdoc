@@ -1,5 +1,6 @@
 site/
 .cache/
+/docs/assets/generated/
 __pycache__/
 *.pyc
 .DS_Store
